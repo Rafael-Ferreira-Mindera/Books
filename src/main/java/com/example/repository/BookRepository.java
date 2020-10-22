@@ -1,6 +1,6 @@
-package repository;
+package com.example.repository;
 
-import model.Book;
+import com.example.model.Book;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 

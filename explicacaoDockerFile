@@ -1,0 +1,4 @@
+FROM openjdk:11-slim -> base image that is being used
+ARG JAR_FILE=target/*.jar -> Store in a variable "JAR_FIL" the file that is in folder "target" 					with the extension ".jar"
+COPY ${JAR_FILE} app.jar -> Copy the jar file into the container labeled as "app.jar"
+ENTRYPOINT ["java","-jar","/app.jar"] -> Similar to CMD command but you can't override its 						instructions. Used to configure how the container will 						run (command and parameters). 

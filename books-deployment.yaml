@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: books-bd
+spec:
+  selector:
+    app: books-bd
+  ports:
+  - port: 5432
+    targetPort: 5432
+    nodePort: 30432 
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: books-bd
+  labels:
+    app: books-bd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: books-bd
+  template:
+    metadata:
+      labels:
+        app: books-bd
+    spec:
+      containers:
+      - name: books-bd
+        image: postgres:12
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_PASSWORD
+          value: "12345"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: books-config
+data:
+  application.properties: |
+    spring.r2dbc.url=r2dbc:postgresql://books-bd:5432/
+    spring.flyway.url=jdbc:postgresql://books-bd:5432/
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: books-app-deployment
+  labels:
+    app: books-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: books-app
+  template:
+    metadata:
+      labels:
+        app: books-app
+    spec:
+      containers:
+      - name: books-app
+        image: rafael/books
+        imagePullPolicy: Never
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+          readOnly: true
+        ports:
+        - containerPort: 8080
+      volumes:
+       - name: config-volume
+         configMap:
+           name: books-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: books-app-service
+spec:
+  selector:
+    app: books-app
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30444 
+  type: NodePort
